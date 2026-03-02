@@ -421,7 +421,14 @@ function showToast(message) {
 
 // Download Resume (placeholder)
 function downloadResume() {
-    showToast('Resume download coming soon!');
+    const link = document.createElement('a');
+    link.href = 'assets/Ly_Resume.pdf'; // path to your resume
+    link.download = 'Ly_Resume.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast('Resume download started!');
 }
 
 // Initialize all
