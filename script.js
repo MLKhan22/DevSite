@@ -159,107 +159,119 @@ function typeText() {
 }
 
 // Populate Skills
-function populateSkills() {
+function createSkillsGrid() {
     const skillsGrid = document.getElementById('skillsGrid');
-    skillsGrid.innerHTML = skills.map(skill => `
-        <div class="skill-card p-4 rounded-xl bg-white dark:bg-gray-700 shadow-lg border border-gray-100 dark:border-gray-600 transition-all duration-300 hover:shadow-xl group cursor-pointer">
-            <div class="flex flex-col items-center gap-2">
-                <i data-lucide="${skill.icon}" class="w-8 h-8 ${skill.color} group-hover:scale-110 transition-transform"></i>
-                <span class="text-sm font-medium">${skill.name}</span>
-            </div>
-        </div>
-    `).join('');
+    skillsGrid.innerHTML = '';
+
+    skills.forEach(skill => {
+        const div = document.createElement('div');
+        div.className = 'flex flex-col items-center gap-2 p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:scale-105 transition-transform';
+
+        div.innerHTML = `
+            <i data-lucide="${skill.icon}" class="w-8 h-8 ${skill.color}"></i>
+            <span class="text-sm text-gray-600 dark:text-gray-300">${skill.name}</span>
+        `;
+
+        skillsGrid.appendChild(div);
+    });
+
+    // Apply Lucide icons AND preserve Tailwind colors
+    lucide.createIcons({ 
+        className: "lucide w-8 h-8" // this will be merged with your classes, including the color
+    });
 }
 
 // Fetch GitHub Repositories
-async function fetchGitHubRepos() {
-    const loading = document.getElementById('projectsLoading');
-    const grid = document.getElementById('projectsGrid');
-    const error = document.getElementById('projectsError');
-    
-    if (!CONFIG.githubUsername) {
-        // Show placeholder projects if no username configured
-        loading.classList.add('hidden');
-        grid.classList.remove('hidden');
-        grid.innerHTML = placeholderProjects.map((project, index) => createProjectCard(project, index)).join('');
-        lucide.createIcons();
-        return;
-    }
+// Fetch GitHub Repositories and render featured projects
+async function fetchGitHubRepos(username) {
+    const projectsGrid = document.getElementById('projectsGrid');
+    const projectsLoading = document.getElementById('projectsLoading');
+    const projectsError = document.getElementById('projectsError');
 
     try {
-        const response = await fetch(`https://api.github.com/users/${CONFIG.githubUsername}/repos?sort=updated&per_page=6`);
-        if (!response.ok) throw new Error('Failed to fetch');
-        
+        const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated`);
+        if (!response.ok) throw new Error('Network response was not ok');
+
         const repos = await response.json();
-        loading.classList.add('hidden');
-        
-        if (repos.length === 0) {
-            error.classList.remove('hidden');
+        const FEATURED_REPO_NAMES = ['YTSheets','DungeonCrawler', '8-bit-DBZ']; // Add your featured repo names here
+        const featuredRepos = repos.filter(repo => FEATURED_REPO_NAMES.includes(repo.name)).slice(0, 3); // Ensure we only take the specified repos
+        // Clear any previous cards
+        projectsGrid.innerHTML = '';
+
+        if (featuredRepos.length === 0) {
+            projectsError.classList.remove('hidden');
+            projectsLoading.classList.add('hidden');
             return;
         }
-        
-        grid.innerHTML = repos.map((repo, index) => createProjectCard(repo, index, true)).join('');
-        grid.classList.remove('hidden');
-        lucide.createIcons();
-    } catch (err) {
-        console.error('Error fetching repos:', err);
-        loading.classList.add('hidden');
-        error.classList.remove('hidden');
+
+        // Populate the grid
+        featuredRepos.forEach(repo => {
+            const card = createProjectCard(repo);
+            projectsGrid.appendChild(card);
+        });
+
+        // Show the grid and hide loading spinner
+        projectsGrid.classList.remove('hidden');
+        projectsLoading.classList.add('hidden');
+        projectsError.classList.add('hidden');
+
+    } catch (error) {
+        console.error(error);
+        projectsLoading.classList.add('hidden');
+        projectsError.classList.remove('hidden');
     }
 }
 
+// Render projects to the grid
+function renderProjects(projects, isGithub = false) {
+    const grid = document.getElementById('projectsGrid');
+    grid.innerHTML = projects.map((proj, i) => createProjectCard(proj, i, isGithub)).join('');
+    lucide.createIcons(); // refresh icons
+}
+
 // Create Project Card HTML
-function createProjectCard(project, index, isGithub = false) {
-    const delay = index * 0.1;
-    
-    if (isGithub) {
-        return `
-            <div class="project-card glass p-6 rounded-2xl reveal" style="transition-delay: ${delay}s">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                        <i data-lucide="folder" class="w-5 h-5 text-primary"></i>
-                    </div>
-                    <div class="flex gap-2">
-                        <span class="flex items-center gap-1 text-yellow-400 text-sm">
-                            <i data-lucide="star" class="w-4 h-4"></i>
-                            ${project.stargazers_count}
-                        </span>
-                        <span class="flex items-center gap-1 text-blue-400 text-sm">
-                            <i data-lucide="git-branch" class="w-4 h-4"></i>
-                            ${project.forks_count}
-                        </span>
-                    </div>
-                </div>
-                <h3 class="text-lg font-bold mb-2">${project.name}</h3>
-                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">${project.description || 'No description available'}</p>
-                <div class="flex items-center justify-between mt-auto">
-                    <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">${project.language || 'N/A'}</span>
-                    <a href="${project.html_url}" target="_blank" class="text-sm text-primary hover:underline flex items-center gap-1">
-                        View <i data-lucide="external-link" class="w-3 h-3"></i>
-                    </a>
-                </div>
-            </div>
-        `;
-    }
-    
-    return `
-        <div class="project-card glass p-6 rounded-2xl reveal" style="transition-delay: ${delay}s">
-            <div class="flex items-start justify-between mb-4">
-                <div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                    <i data-lucide="folder" class="w-5 h-5 text-primary"></i>
-                </div>
-                <span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs">${project.category}</span>
-            </div>
-            <h3 class="text-lg font-bold mb-2">${project.name}</h3>
-            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">${project.description}</p>
-            <div class="flex flex-wrap gap-2 mb-4">
-                ${project.tags.map(tag => `<span class="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700">${tag}</span>`).join('')}
-            </div>
-            <div class="flex items-center justify-between">
-                <a href="#" class="text-primary hover:underline text-sm">Learn more →</a>
-            </div>
-        </div>
+function createProjectCard(repo) {
+    // Create card container
+    const card = document.createElement('div');
+    card.className = `
+        project-card p-6 rounded-2xl 
+        bg-gray-50 dark:bg-gray-800/70
+        border border-gray-200 dark:border-gray-700
+        transition-all duration-300
+        hover:translate-y-1 hover:shadow-lg
     `;
+
+    // Project name
+    const name = document.createElement('h3');
+    name.className = `
+        text-lg font-semibold mb-2 
+        text-gray-900 dark:text-white
+    `;
+    name.textContent = repo.name;
+
+    // Project description
+    const desc = document.createElement('p');
+    desc.className = `
+        text-gray-700 dark:text-gray-300 text-sm
+    `;
+    desc.textContent = repo.description || "No description provided.";
+
+    // Project link
+    const link = document.createElement('a');
+    link.href = repo.html_url;
+    link.target = "_blank";
+    link.className = `
+        mt-4 inline-block text-primary dark:text-secondary 
+        font-medium hover:underline
+    `;
+    link.textContent = "View on GitHub";
+
+    // Append children to card
+    card.appendChild(name);
+    card.appendChild(desc);
+    card.appendChild(link);
+
+    return card;
 }
 
 const placeholderProjects = [
@@ -415,9 +427,9 @@ function downloadResume() {
 // Initialize all
 document.addEventListener('DOMContentLoaded', () => {
     typeText();
-    populateSkills();
+    createSkillsGrid();
     populateResume();
-    fetchGitHubRepos();
+    fetchGitHubRepos(CONFIG.githubUsername);
     initTheme();
     initMobileMenu();
     initScrollAnimations();
