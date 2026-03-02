@@ -29,11 +29,23 @@ const skills = [
 
 // Resume Timeline Data
 const resumeData = [
-  {
+    {
+        type: "work", 
+        title: "Software Developer", 
+        company: "Paycom Payroll", 
+        date: "2025 - 2026", 
+        description: "Developed and maintained PHP-based features for the company’s CRM system, focusing on PHPStorm. Optimized SQL queries to improve system performance, implemented QA tests to ensure reliability, and ensured compliance with security standards for handling sensitive client data.", 
+        skills: ["PHP", 
+            "SQL", 
+            "PHPStorm", 
+            "QA Testing", 
+            "Security Compliance"]
+    },
+    {
     type: "work",
     title: "Software Developer",
     company: "Trinoor LLC",
-    date: "2021 - 2025",
+    date: "2021 - 2026",
     description: "Fixed bugs in Hitachi’s Enterprise Asset Suite Management using Compose and Next Axiom, enhanced user experience for TASHelix subapps, and developed a React build for Android. Collaborated with cross-functional teams to resolve production issues.",
     skills: [
       "Compose",
