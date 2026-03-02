@@ -123,42 +123,6 @@ const resumeData = [
       "Database Systems",
       "Operating Systems"
     ]
-  },
-  {
-    type: "project",
-    title: "YTSheets",
-    description: "Generated sheet music from YouTube piano tutorials using a neural network trained in Python with TensorFlow. Designed a system for labeling image data for training.",
-    skills: [
-      "Python",
-      "TensorFlow",
-      "Neural Networks",
-      "Image Labeling",
-      "Machine Learning"
-    ]
-  },
-  {
-    type: "project",
-    title: "8-Bit DBZ",
-    description: "Developed a platformer game for iOS in Swift using sprites from Dragon Ball Z. Implemented physics for collision detection and object interactions.",
-    skills: [
-      "Swift",
-      "Game Development",
-      "Physics Simulation",
-      "Sprite Animation",
-      "iOS Development"
-    ]
-  },
-  {
-    type: "project",
-    title: "Pokemon Ranger Battle",
-    description: "Recreated the battling mechanics of the Pokemon Ranger series for the Nintendo DS using Java. Implemented computational geometry for path detection and sprite animations.",
-    skills: [
-      "Java",
-      "Computational Geometry",
-      "Sprite Animation",
-      "Game Mechanics",
-      "Pathfinding"
-    ]
   }
 ];
 
